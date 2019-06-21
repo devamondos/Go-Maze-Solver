@@ -33,10 +33,10 @@ func analysePath(maze *Maze) {
 			} else if isTransparent(pixel) {
 				maze.pixels[row][rowPos].setPath(true)
 				if row == 0 {
-					maze.pixels[row][rowPos].isStart = true
+					maze.pixels[row][rowPos].IsStart = true
 					maze.setStart(row, rowPos)
 				} else if (row + 1) == rows {
-					maze.pixels[row][rowPos].isEnd = true
+					maze.pixels[row][rowPos].IsEnd = true
 					maze.setEnd(row, rowPos)
 				}
 			} else {
@@ -45,17 +45,17 @@ func analysePath(maze *Maze) {
 			}
 		}
 	}
-	maze.rows = rows
+	maze.Rows = rows
 }
 
 func analyseNodes(maze *Maze) {
-	for row := 0; row < maze.rows; row++ {
-		for rowPos := 0; rowPos < maze.rowLength; rowPos++ {
+	for row := 0; row < maze.Rows; row++ {
+		for rowPos := 0; rowPos < maze.RowLength; rowPos++ {
 			pixel, err := maze.GetPixel(row, rowPos)
 			if err != nil {
 				log.Fatal(err)
-			} else if pixel.isPath {
-				if pixel.isStart || pixel.isEnd {
+			} else if pixel.IsPath {
+				if pixel.IsStart || pixel.IsEnd {
 					pixel.IsNode = true
 					maze.nodes++
 				} else {
@@ -104,26 +104,28 @@ func analyseNodes(maze *Maze) {
 
 func printMaze(maze *Maze) {
 
-	fmt.Printf("\n - Number of row: %d\n", maze.rows)
-	fmt.Printf(" - row length: %d\n", maze.rowLength)
+	fmt.Printf("\n - Number of row: %d\n", maze.Rows)
+	fmt.Printf(" - row length: %d\n", maze.RowLength)
 	fmt.Printf(" - Start array position: (%d,%d)\n", maze.StartRow, maze.StartRowPos)
 	fmt.Printf(" - End array position: (%d,%d)\n", maze.EndRow, maze.EndRowPos)
 	fmt.Printf(" - Number of nodes: %d\n\n", maze.nodes) // Expecting 74
 
-	for row := 0; row < maze.rows; row++ {
-		for rowPos := 0; rowPos < maze.rowLength; rowPos++ {
+	for row := 0; row < maze.Rows; row++ {
+		for rowPos := 0; rowPos < maze.RowLength; rowPos++ {
 			pixel, err := maze.GetPixel(row, rowPos)
 			if err != nil {
 				log.Fatal(err)
 			} else {
-				if pixel.IsWall {
-					fmt.Print("@")
+				if pixel.IsStart || pixel.IsEnd {
+					fmt.Print("~")
+				} else if pixel.IsPath {
+					fmt.Print(" ")
 				} else if pixel.IsDeadEnd {
 					fmt.Print("X")
 				} else if pixel.IsNode {
 					fmt.Print("O")
-				} else if pixel.isPath {
-					fmt.Print(" ")
+				} else {
+					fmt.Print("@")
 				}
 			}
 		}

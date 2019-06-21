@@ -8,8 +8,8 @@ import (
 // Maze struct
 type Maze struct {
 	pixels      [][]Pixel
-	rows        int
-	rowLength   int
+	Rows        int
+	RowLength   int
 	nodes       int
 	StartRow    int
 	StartRowPos int
@@ -28,11 +28,11 @@ func (m *Maze) setEnd(row int, rowPos int) {
 }
 
 func (m *Maze) setRowLength(rowLength int) {
-	if m.rowLength != 0 && (m.rowLength != rowLength) {
+	if m.RowLength != 0 && (m.RowLength != rowLength) {
 		fmt.Println("Error: Image is not a square. Uneven column counts.")
 		os.Exit(1)
 	}
-	m.rowLength = rowLength
+	m.RowLength = rowLength
 }
 
 // GetPixel will return a pixel at a given location
@@ -49,28 +49,28 @@ func (m *Maze) GetSurroundingPaths(row int, rowPos int) (*Pixel, *Pixel, *Pixel,
 	// Upper
 	if (row - 1) > 0 { // ignore upper wall
 		pixel, _ := m.GetPixel(row-1, rowPos)
-		if pixel.isPath {
+		if pixel.IsPath {
 			upperPath = pixel
 		}
 	}
 	// Right
-	if (rowPos + 1) < (m.rowLength - 1) { // ignore right wall
+	if (rowPos + 1) < (m.RowLength - 1) { // ignore right wall
 		pixel, _ := m.GetPixel(row, rowPos+1)
-		if pixel.isPath {
+		if pixel.IsPath {
 			rightPath = pixel
 		}
 	}
 	// Lower
-	if (row + 1) < (m.rows - 1) { // ignore bottom wall
+	if (row + 1) < (m.Rows - 1) { // ignore bottom wall
 		pixel, _ := m.GetPixel(row+1, rowPos)
-		if pixel.isPath {
+		if pixel.IsPath {
 			lowerPath = pixel
 		}
 	}
 	// Left
 	if (rowPos - 1) > 0 { // ignore left wall
 		pixel, _ := m.GetPixel(row, rowPos-1)
-		if pixel.isPath {
+		if pixel.IsPath {
 			leftPath = pixel
 		}
 	}
@@ -78,99 +78,83 @@ func (m *Maze) GetSurroundingPaths(row int, rowPos int) (*Pixel, *Pixel, *Pixel,
 }
 
 // GetNextNodeUp - gets next node up (stupid linter)
-func (m *Maze) GetNextNodeUp(row int, rowPos int) (*Pixel, error) {
-	for rowIndex := (row - 1); rowIndex > 1; rowIndex-- { // ignoring top wall
+func (m *Maze) GetNextNodeUp(row int, rowPos int) (*Pixel, [][2]int, error) {
+	moves := [][2]int{}
+	for rowIndex := (row - 1); rowIndex > 0; rowIndex-- { // ignoring top wall
 		pixel, err := m.GetPixel(rowIndex, rowPos)
 		if err != nil {
-			return nil, fmt.Errorf("Pixel does not exist at (%d,%d)", rowIndex, row)
+			return nil, moves, fmt.Errorf("Pixel does not exist at (%d,%d)", rowIndex, rowPos)
 		}
-		if pixel.IsWall {
-			return pixel, fmt.Errorf("Error: Next node up is a wall (%d,%d)", rowIndex, row)
+		if !pixel.IsPath {
+			return pixel, moves, fmt.Errorf("Error: Next node up is a wall (%d,%d)", rowIndex, rowPos)
 		} else if pixel.IsNode {
-			return pixel, nil
-		} else if pixel.isPath {
-			pixel, err := m.GetNextNodeUp(rowIndex, row)
-			if err != nil {
-				return nil, err
-			}
-			return pixel, nil
+			return pixel, moves, nil
 		} else {
-			return nil, fmt.Errorf("Error: Pixel is unknown (%d,%d)", rowIndex, row)
+			moves = append(moves, [2]int{rowIndex, rowPos})
+			continue
 		}
 	}
-	return nil, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
+	return nil, moves, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
 }
 
 // GetNextNodeRight - gets next node right (stupid linter)
-func (m *Maze) GetNextNodeRight(row int, rowPos int) (*Pixel, error) {
-	for rowPosIndex := (rowPos + 1); rowPosIndex < (m.rowLength - 2); rowPosIndex++ { // ignoring right wall
+func (m *Maze) GetNextNodeRight(row int, rowPos int) (*Pixel, [][2]int, error) {
+	moves := [][2]int{}
+	for rowPosIndex := (rowPos + 1); rowPosIndex < (m.RowLength - 1); rowPosIndex++ { // ignoring right wall
 		pixel, err := m.GetPixel(row, rowPosIndex)
 		if err != nil {
-			return nil, fmt.Errorf("Pixel does not exist at (%d,%d)", row, rowPosIndex)
+			return nil, moves, fmt.Errorf("Pixel does not exist at (%d,%d)", row, rowPosIndex)
 		}
-		if pixel.IsWall {
-			return pixel, fmt.Errorf("Error: Next node up is a wall (%d,%d)", row, rowPosIndex)
+		if !pixel.IsPath {
+			return pixel, moves, fmt.Errorf("Error: Next node up is a wall (%d,%d)", row, rowPosIndex)
 		} else if pixel.IsNode {
-			return pixel, nil
-		} else if pixel.isPath {
-			pixel, err := m.GetNextNodeRight(row, rowPosIndex)
-			if err != nil {
-				return nil, err
-			}
-			return pixel, nil
+			return pixel, moves, nil
 		} else {
-			return nil, fmt.Errorf("Error: Pixel is unknown (%d,%d)", row, rowPosIndex)
+			moves = append(moves, [2]int{row, rowPosIndex})
+			continue
 		}
 	}
-	return nil, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
+	return nil, moves, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
 }
 
 // GetNextNodeDown - gets next node down (stupid linter)
-func (m *Maze) GetNextNodeDown(row int, rowPos int) (*Pixel, error) {
-	for rowIndex := (row + 1); rowIndex < (m.rows - 1); rowIndex++ { // not ignoring bottom wall, that's where the exit is
+func (m *Maze) GetNextNodeDown(row int, rowPos int) (*Pixel, [][2]int, error) {
+	moves := [][2]int{}
+	for rowIndex := (row + 1); rowIndex < m.Rows; rowIndex++ { // not ignoring bottom wall, that's where the exit is
 		pixel, err := m.GetPixel(rowIndex, rowPos)
 		if err != nil {
-			return nil, fmt.Errorf("Pixel does not exist at (%d,%d)", rowIndex, rowPos)
+			return nil, moves, fmt.Errorf("Pixel does not exist at (%d,%d)", rowIndex, rowPos)
 		}
-		if pixel.IsWall {
-			return pixel, fmt.Errorf("Error: Next node up is a wall (%d,%d)", rowIndex, rowPos)
+		if !pixel.IsPath {
+			return pixel, moves, fmt.Errorf("Error: Next node up is a wall (%d,%d)", rowIndex, rowPos)
 		} else if pixel.IsNode {
-			return pixel, nil
-		} else if pixel.isPath {
-			pixel, err := m.GetNextNodeDown(rowIndex, rowPos)
-			if err != nil {
-				return nil, err
-			}
-			return pixel, nil
+			return pixel, moves, nil
 		} else {
-			return nil, fmt.Errorf("Error: Pixel is unknown (%d,%d)", rowIndex, rowPos)
+			moves = append(moves, [2]int{rowIndex, rowPos})
+			continue
 		}
 	}
-	return nil, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
+	return nil, moves, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
 }
 
 // GetNextNodeLeft - gets next node left (stupid linter)
-func (m *Maze) GetNextNodeLeft(row int, rowPos int) (*Pixel, error) {
-	for rowPosIndex := (rowPos - 1); rowPosIndex > 1; rowPosIndex-- { // ignoring left wall
+func (m *Maze) GetNextNodeLeft(row int, rowPos int) (*Pixel, [][2]int, error) {
+	moves := [][2]int{}
+	for rowPosIndex := (rowPos - 1); rowPosIndex > 0; rowPosIndex-- { // ignoring left wall
 		pixel, err := m.GetPixel(row, rowPosIndex)
 		if err != nil {
-			return nil, fmt.Errorf("Pixel does not exist at (%d,%d)", row, rowPosIndex)
+			return nil, moves, fmt.Errorf("Pixel does not exist at (%d,%d)", row, rowPosIndex)
 		}
-		if pixel.IsWall {
-			return pixel, fmt.Errorf("Error: Next node up is a wall (%d,%d)", row, rowPosIndex)
+		if !pixel.IsPath {
+			return pixel, moves, fmt.Errorf("Error: Next node up is a wall (%d,%d)", row, rowPosIndex)
 		} else if pixel.IsNode {
-			return pixel, nil
-		} else if pixel.isPath {
-			pixel, err := m.GetNextNodeLeft(row, rowPosIndex)
-			if err != nil {
-				return nil, err
-			}
-			return pixel, nil
+			return pixel, moves, nil
 		} else {
-			return nil, fmt.Errorf("Error: Pixel is unknown (%d,%d)", row, rowPosIndex)
+			moves = append(moves, [2]int{row, rowPosIndex})
+			continue
 		}
 	}
-	return nil, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
+	return nil, moves, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
 }
 
 // Rgba struct
@@ -184,10 +168,9 @@ type Pixel struct {
 	Row       int
 	RowPos    int
 	visited   bool
-	isStart   bool
-	isEnd     bool
-	isPath    bool
-	IsWall    bool
+	IsStart   bool
+	IsEnd     bool
+	IsPath    bool
 	IsNode    bool
 	IsDeadEnd bool
 }
@@ -195,6 +178,5 @@ type Pixel struct {
 func (p *Pixel) setPath(isPath bool) {
 	// Probably don't need both of these values since one would tell us what we need to know
 	// It just reads better
-	p.isPath = isPath
-	p.IsWall = !isPath
+	p.IsPath = isPath
 }

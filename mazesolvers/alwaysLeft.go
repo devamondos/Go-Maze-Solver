@@ -3,99 +3,131 @@ package mazesolvers
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	m "github.com/devamondos/maze_solver/mazeutils"
 )
 
-type mazeMeta struct {
-	row       int
-	rowPos    int
-	direction string
+// MazeMeta holds meta data for the solution taken
+type MazeMeta struct {
+	row        int
+	rowPos     int
+	direction  int
+	directions [4]string
+	moves      []string
 }
 
-func alwaysLeft(maze *m.Maze) {
-	meta := mazeMeta{maze.StartRow, maze.StartRowPos, "down"}
-	makeMove(maze, &meta)
+func (m *MazeMeta) addMove(row int, rowPos int) {
+	m.moves = append(m.moves, strconv.Itoa(row)+","+strconv.Itoa(rowPos))
 }
 
-func makeMove(maze *m.Maze, meta *mazeMeta) {
+func (m *MazeMeta) addMoves(moves [][2]int) {
+	for _, move := range moves {
+		m.addMove(move[0], move[1])
+	}
+}
+
+func (m *MazeMeta) containsMove(row int, rowPos int) bool {
+	strPos := strconv.Itoa(row) + "," + strconv.Itoa(rowPos)
+	for _, a := range m.moves {
+		if a == strPos {
+			return true
+		}
+	}
+	return false
+}
+
+func alwaysLeft(maze *m.Maze) *MazeMeta {
+	meta := &MazeMeta{
+		row:        maze.StartRow,
+		rowPos:     maze.StartRowPos,
+		direction:  2,
+		directions: [4]string{"up", "right", "down", "left"},
+		moves:      []string{},
+	}
+	makeMove(maze, meta)
+	return meta
+}
+
+func makeMove(maze *m.Maze, meta *MazeMeta) {
+	fmt.Printf("At (%d,%d) ... going %s\n", meta.row, meta.rowPos, meta.directions[meta.direction])
+	// time.Sleep(1 * time.Second)
 	nextPixel := checkNextPixel(maze, meta)
 	var pixel *m.Pixel
+	var moves [][2]int
 	var err error
 	if nextPixel == nil {
 		fmt.Println("Error: could not find next pixel")
 		os.Exit(1)
 	}
-	if nextPixel.IsWall {
-		changeDirection(maze, meta, true)
+	if nextPixel.IsEnd {
+		fmt.Printf("EXIT FOUND!! FUCK YEAH!! (%d, %d)", nextPixel.Row, nextPixel.RowPos)
+		meta.addMove(meta.row, meta.rowPos)
+		return
+	} else if !nextPixel.IsPath || nextPixel.IsDeadEnd {
+		fmt.Println("Next pixel is wall or dead end")
+		changeDirection(maze, meta, nextPixel)
 	} else if nextPixel.IsNode {
+		fmt.Println("Next pixel is node")
+		meta.addMove(meta.row, meta.rowPos)
 		setMazeLocation(meta, nextPixel)
-		changeDirection(maze, meta, false)
+		changeDirection(maze, meta, nextPixel)
 	} else {
-		switch meta.direction {
+		// fmt.Printf("%d,%d - ", meta.row, meta.rowPos)
+		switch meta.directions[meta.direction] {
 		case "up":
-			fmt.Println("up")
-			pixel, err = maze.GetNextNodeUp(meta.row, meta.rowPos)
+			pixel, moves, err = maze.GetNextNodeUp(meta.row, meta.rowPos)
 			break
 		case "right":
-			fmt.Println("right")
-			pixel, err = maze.GetNextNodeRight(meta.row, meta.rowPos)
+			pixel, moves, err = maze.GetNextNodeRight(meta.row, meta.rowPos)
 			break
 		case "down":
-			fmt.Println("down")
-			pixel, err = maze.GetNextNodeDown(meta.row, meta.rowPos)
+			pixel, moves, err = maze.GetNextNodeDown(meta.row, meta.rowPos)
 			break
 		case "left":
-			fmt.Println("left")
-			pixel, err = maze.GetNextNodeLeft(meta.row, meta.rowPos)
+			pixel, moves, err = maze.GetNextNodeLeft(meta.row, meta.rowPos)
 			break
 		}
-
 	}
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	} else if pixel != nil {
-		setMazeLocation(meta, pixel)
+		moves = append(moves, [2]int{meta.row, meta.rowPos})
+		meta.addMoves(moves)
 		if pixel.IsDeadEnd {
-			fmt.Printf("Encountered dead end (%d,%d)\n", meta.row, meta.rowPos)
-			changeDirection(maze, meta, false)
-			// makeMove(maze, meta)
+			fmt.Printf("Encountered dead end (%d,%d)\n", pixel.Row, pixel.RowPos)
+			changeDirection(maze, meta, pixel)
 		} else if pixel.IsNode {
 			fmt.Printf("Node array pos (%d,%d)\n", pixel.Row, pixel.RowPos)
-			changeDirection(maze, meta, false)
+			setMazeLocation(meta, pixel)
+			changeDirection(maze, meta, nextPixel)
 		}
-	} else {
-		fmt.Println("Pixel and error is nil")
 	}
 }
 
-func setMazeLocation(meta *mazeMeta, pixel *m.Pixel) {
+func setMazeLocation(meta *MazeMeta, pixel *m.Pixel) {
 	meta.row = pixel.Row
 	meta.rowPos = pixel.RowPos
 }
 
-func checkNextPixel(maze *m.Maze, meta *mazeMeta) *m.Pixel {
+func checkNextPixel(maze *m.Maze, meta *MazeMeta) *m.Pixel {
 	var nextRow, nextRowPos int
-	switch meta.direction {
+	switch meta.directions[meta.direction] {
 	case "up":
-		fmt.Println("up")
 		nextRow = meta.row - 1
 		nextRowPos = meta.rowPos
 		break
 	case "right":
-		fmt.Println("right")
 		nextRow = meta.row
 		nextRowPos = meta.rowPos + 1
 		break
 	case "down":
-		fmt.Println("down")
 		nextRow = meta.row + 1
 		nextRowPos = meta.rowPos
 		break
 	case "left":
-		fmt.Println("left")
 		nextRow = meta.row
 		nextRowPos = meta.rowPos - 1
 		break
@@ -104,40 +136,22 @@ func checkNextPixel(maze *m.Maze, meta *mazeMeta) *m.Pixel {
 	return nextPixel
 }
 
-func changeDirection(maze *m.Maze, meta *mazeMeta, wallEncountered bool) {
-	getNextDirection(meta, wallEncountered)
+func changeDirection(maze *m.Maze, meta *MazeMeta, pixel *m.Pixel) {
+	getNextDirection(meta, pixel)
 	makeMove(maze, meta)
 }
 
-func getNextDirection(meta *mazeMeta, wallEncountered bool) {
-	switch meta.direction {
-	case "up":
-		if wallEncountered {
-			meta.direction = "right"
-		} else {
-			meta.direction = "left"
-		}
-		break
-	case "right":
-		if wallEncountered {
-			meta.direction = "down"
-		} else {
-			meta.direction = "up"
-		}
-		break
-	case "down":
-		if wallEncountered {
-			meta.direction = "left"
-		} else {
-			meta.direction = "right"
-		}
-		break
-	case "left":
-		if wallEncountered {
-			meta.direction = "up"
-		} else {
-			meta.direction = "down"
-		}
-		break
+func getNextDirection(meta *MazeMeta, pixel *m.Pixel) {
+	if !pixel.IsPath {
+		meta.direction++
+	} else if pixel.IsDeadEnd {
+		meta.direction++
+	} else {
+		meta.direction--
+	}
+	if meta.direction > 3 {
+		meta.direction -= 4
+	} else if meta.direction < 0 {
+		meta.direction += 4
 	}
 }
