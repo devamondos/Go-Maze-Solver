@@ -116,7 +116,7 @@ func printMaze(maze *Maze) {
 			if err != nil {
 				log.Fatal(err)
 			} else {
-				if pixel.isWall {
+				if pixel.IsWall {
 					fmt.Print("@")
 				} else if pixel.IsDeadEnd {
 					fmt.Print("X")

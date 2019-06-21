@@ -84,7 +84,7 @@ func (m *Maze) GetNextNodeUp(row int, rowPos int) (*Pixel, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Pixel does not exist at (%d,%d)", rowIndex, row)
 		}
-		if pixel.isWall {
+		if pixel.IsWall {
 			return pixel, fmt.Errorf("Error: Next node up is a wall (%d,%d)", rowIndex, row)
 		} else if pixel.IsNode {
 			return pixel, nil
@@ -108,7 +108,7 @@ func (m *Maze) GetNextNodeRight(row int, rowPos int) (*Pixel, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Pixel does not exist at (%d,%d)", row, rowPosIndex)
 		}
-		if pixel.isWall {
+		if pixel.IsWall {
 			return pixel, fmt.Errorf("Error: Next node up is a wall (%d,%d)", row, rowPosIndex)
 		} else if pixel.IsNode {
 			return pixel, nil
@@ -132,7 +132,7 @@ func (m *Maze) GetNextNodeDown(row int, rowPos int) (*Pixel, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Pixel does not exist at (%d,%d)", rowIndex, rowPos)
 		}
-		if pixel.isWall {
+		if pixel.IsWall {
 			return pixel, fmt.Errorf("Error: Next node up is a wall (%d,%d)", rowIndex, rowPos)
 		} else if pixel.IsNode {
 			return pixel, nil
@@ -156,7 +156,7 @@ func (m *Maze) GetNextNodeLeft(row int, rowPos int) (*Pixel, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Pixel does not exist at (%d,%d)", row, rowPosIndex)
 		}
-		if pixel.isWall {
+		if pixel.IsWall {
 			return pixel, fmt.Errorf("Error: Next node up is a wall (%d,%d)", row, rowPosIndex)
 		} else if pixel.IsNode {
 			return pixel, nil
@@ -184,10 +184,10 @@ type Pixel struct {
 	Row       int
 	RowPos    int
 	visited   bool
-	isPath    bool
-	isWall    bool
 	isStart   bool
 	isEnd     bool
+	isPath    bool
+	IsWall    bool
 	IsNode    bool
 	IsDeadEnd bool
 }
@@ -196,5 +196,5 @@ func (p *Pixel) setPath(isPath bool) {
 	// Probably don't need both of these values since one would tell us what we need to know
 	// It just reads better
 	p.isPath = isPath
-	p.isWall = !isPath
+	p.IsWall = !isPath
 }
