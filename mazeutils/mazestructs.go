@@ -2,6 +2,7 @@ package mazeutils
 
 import (
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -29,7 +30,7 @@ func (m *Maze) setEnd(row int, rowPos int) {
 
 func (m *Maze) setRowLength(rowLength int) {
 	if m.RowLength != 0 && (m.RowLength != rowLength) {
-		fmt.Println("Error: Image is not a square. Uneven column counts.")
+		log.Println("Error: Image is not a square. Uneven column counts.")
 		os.Exit(1)
 	}
 	m.RowLength = rowLength

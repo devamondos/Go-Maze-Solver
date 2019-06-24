@@ -8,18 +8,18 @@ import (
 )
 
 // Solve the maze
-func Solve(maze *m.Maze, solution string) {
+func Solve(maze *m.Maze, solution string, debug bool) {
 	switch solution {
 	case "alwaysLeft":
-		meta := alwaysLeft(maze)
+		meta := alwaysLeft(maze, debug)
 		printSolution(maze, meta)
 		break
 	}
 }
 
 func printSolution(maze *m.Maze, meta *MazeMeta) {
-	fmt.Printf("\n\n - Number of moves: %d\n\n", len(meta.moves))
-	// fmt.Printf(" - Time taken: %d\n\n", )
+	log.Printf("\n\n - Number of moves: %d\n\n", len(meta.moves))
+	// log.Printf(" - Time taken: %d\n\n", )
 
 	for row := 0; row < maze.Rows; row++ {
 		for rowPos := 0; rowPos < maze.RowLength; rowPos++ {

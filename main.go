@@ -1,19 +1,20 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/devamondos/maze_solver/mazesolvers"
 	"github.com/devamondos/maze_solver/mazeutils"
 )
 
 func main() {
-	fmt.Println("\nReading image...")
+	debug := true
+	log.Println("Reading image...")
 	maze := mazeutils.Read("medium.png")
-	fmt.Println("\nAnalysing maze...")
+	log.Println("Analysing maze...")
 	mazeutils.Analyse(maze, true)
-	fmt.Println("\nSolving maze...")
-	mazesolvers.Solve(maze, "alwaysLeft")
+	log.Println("Solving maze...")
+	mazesolvers.Solve(maze, "alwaysLeft", debug)
 	// TODO:
 	// - Create map
 	// - Solve map using simple algorithm (always turn left etc.)

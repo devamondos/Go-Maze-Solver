@@ -1,10 +1,10 @@
 package mazeutils
 
 import (
-	"fmt"
 	"image"
 	"image/png"
 	"io"
+	"log"
 	"os"
 )
 
@@ -16,7 +16,7 @@ func Read(filePath string) *Maze {
 	file, err := os.Open(filePath)
 
 	if err != nil {
-		fmt.Println("Error: File could not be opened")
+		log.Println("Error: File could not be opened")
 		os.Exit(1)
 	}
 
@@ -25,7 +25,7 @@ func Read(filePath string) *Maze {
 	maze, err := getMaze(file)
 
 	if err != nil {
-		fmt.Println("Error: Image could not be decoded")
+		log.Println("Error: Image could not be decoded")
 		os.Exit(1)
 	}
 
