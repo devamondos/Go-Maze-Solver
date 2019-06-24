@@ -4,8 +4,9 @@ import (
 	"image"
 	"image/png"
 	"io"
-	"log"
 	"os"
+
+	"github.com/golang/glog"
 )
 
 // Read image and return pixel array
@@ -16,7 +17,7 @@ func Read(filePath string) *Maze {
 	file, err := os.Open(filePath)
 
 	if err != nil {
-		log.Println("Error: File could not be opened")
+		glog.Error("Error: File could not be opened")
 		os.Exit(1)
 	}
 
@@ -25,7 +26,7 @@ func Read(filePath string) *Maze {
 	maze, err := getMaze(file)
 
 	if err != nil {
-		log.Println("Error: Image could not be decoded")
+		glog.Error("Error: Image could not be decoded")
 		os.Exit(1)
 	}
 

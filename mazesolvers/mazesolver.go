@@ -2,9 +2,9 @@ package mazesolvers
 
 import (
 	"fmt"
-	"log"
 
 	m "github.com/devamondos/maze_solver/mazeutils"
+	"github.com/golang/glog"
 )
 
 // Solve the maze
@@ -18,8 +18,9 @@ func Solve(maze *m.Maze, solution string, debug bool) {
 }
 
 func printSolution(maze *m.Maze, meta *MazeMeta) {
-	log.Printf("\n\n - Number of moves: %d\n\n", len(meta.moves))
-	// log.Printf(" - Time taken: %d\n\n", )
+	glog.Info("Solution found:")
+	glog.Infof(" - Number of moves: %d", len(meta.moves))
+	glog.Infof(" - Time taken: %d\n\n", 0)
 
 	for row := 0; row < maze.Rows; row++ {
 		for rowPos := 0; rowPos < maze.RowLength; rowPos++ {
@@ -28,7 +29,7 @@ func printSolution(maze *m.Maze, meta *MazeMeta) {
 			} else {
 				pixel, err := maze.GetPixel(row, rowPos)
 				if err != nil {
-					log.Fatal(err)
+					glog.Fatal(err)
 				} else {
 					if pixel.IsPath {
 						fmt.Print(" ")
