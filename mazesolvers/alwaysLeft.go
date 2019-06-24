@@ -1,12 +1,12 @@
 package mazesolvers
 
 import (
-	"log"
 	"os"
 	"strconv"
 	"time"
 
 	m "github.com/devamondos/maze_solver/mazeutils"
+	"github.com/golang/glog"
 )
 
 // MazeMeta holds meta data for the solution taken
@@ -53,7 +53,7 @@ func alwaysLeft(maze *m.Maze, debug bool) *MazeMeta {
 }
 
 func makeMove(maze *m.Maze, meta *MazeMeta) {
-	log.Printf("At (%d,%d) ... going %s\n", meta.row, meta.rowPos, meta.directions[meta.direction])
+	glog.V(2).Infof("At (%d,%d) ... going %s\n", meta.row, meta.rowPos, meta.directions[meta.direction])
 	if meta.debug {
 		time.Sleep(1 * time.Second)
 	}
@@ -62,23 +62,22 @@ func makeMove(maze *m.Maze, meta *MazeMeta) {
 	var moves [][2]int
 	var err error
 	if nextPixel == nil {
-		log.Printf("Error: could not find next pixel")
+		glog.Fatal("Error: could not find next pixel")
 		os.Exit(1)
 	}
 	if nextPixel.IsEnd {
-		log.Printf("EXIT FOUND!! FUCK YEAH!! (%d, %d)", nextPixel.Row, nextPixel.RowPos)
+		glog.V(2).Infof("EXIT FOUND!! (%d, %d)", nextPixel.Row, nextPixel.RowPos)
 		meta.addMove(meta.row, meta.rowPos)
 		return
 	} else if !nextPixel.IsPath || nextPixel.IsDeadEnd {
-		log.Println("Next pixel is wall or dead end")
+		glog.V(2).Info("Next pixel is wall or dead end")
 		changeDirection(maze, meta, nextPixel)
 	} else if nextPixel.IsNode {
-		log.Println("Next pixel is node")
+		glog.V(2).Info("Next pixel is node")
 		meta.addMove(meta.row, meta.rowPos)
 		setMazeLocation(meta, nextPixel)
 		changeDirection(maze, meta, nextPixel)
 	} else {
-		// log.Printf("%d,%d - ", meta.row, meta.rowPos)
 		switch meta.directions[meta.direction] {
 		case "up":
 			pixel, moves, err = maze.GetNextNodeUp(meta.row, meta.rowPos)
@@ -96,16 +95,16 @@ func makeMove(maze *m.Maze, meta *MazeMeta) {
 	}
 
 	if err != nil {
-		log.Println(err)
+		glog.Fatal(err)
 		os.Exit(1)
 	} else if pixel != nil {
 		moves = append(moves, [2]int{meta.row, meta.rowPos})
 		meta.addMoves(moves)
 		if pixel.IsDeadEnd {
-			log.Printf("Encountered dead end (%d,%d)\n", pixel.Row, pixel.RowPos)
+			glog.V(2).Infof("Encountered dead end (%d,%d)\n", pixel.Row, pixel.RowPos)
 			changeDirection(maze, meta, pixel)
 		} else if pixel.IsNode {
-			log.Printf("Node array pos (%d,%d)\n", pixel.Row, pixel.RowPos)
+			glog.V(2).Infof("Node array pos (%d,%d)\n", pixel.Row, pixel.RowPos)
 			setMazeLocation(meta, pixel)
 			changeDirection(maze, meta, nextPixel)
 		}

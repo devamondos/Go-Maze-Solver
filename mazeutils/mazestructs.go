@@ -2,8 +2,9 @@ package mazeutils
 
 import (
 	"fmt"
-	"log"
 	"os"
+
+	"github.com/golang/glog"
 )
 
 // Maze struct
@@ -30,7 +31,7 @@ func (m *Maze) setEnd(row int, rowPos int) {
 
 func (m *Maze) setRowLength(rowLength int) {
 	if m.RowLength != 0 && (m.RowLength != rowLength) {
-		log.Println("Error: Image is not a square. Uneven column counts.")
+		glog.Error("Error: Image is not a square. Uneven column counts.")
 		os.Exit(1)
 	}
 	m.RowLength = rowLength
@@ -48,7 +49,7 @@ func (m *Maze) GetPixel(row int, rowPos int) (*Pixel, error) {
 func (m *Maze) GetSurroundingPaths(row int, rowPos int) (*Pixel, *Pixel, *Pixel, *Pixel) {
 	var upperPath, rightPath, lowerPath, leftPath *Pixel
 	// Upper
-	if (row - 1) > 0 { // ignore upper wall
+	if row > 0 { // do not ignore upper wall, that's where the start is
 		pixel, _ := m.GetPixel(row-1, rowPos)
 		if pixel.IsPath {
 			upperPath = pixel
@@ -62,7 +63,7 @@ func (m *Maze) GetSurroundingPaths(row int, rowPos int) (*Pixel, *Pixel, *Pixel,
 		}
 	}
 	// Lower
-	if (row + 1) < (m.Rows - 1) { // ignore bottom wall
+	if (row + 1) < m.Rows { // do not ignore bottom wall, that's where the end is
 		pixel, _ := m.GetPixel(row+1, rowPos)
 		if pixel.IsPath {
 			lowerPath = pixel

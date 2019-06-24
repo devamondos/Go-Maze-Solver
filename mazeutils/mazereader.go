@@ -2,8 +2,9 @@ package mazeutils
 
 import (
 	"fmt"
-	"log"
 	"os"
+
+	"github.com/golang/glog"
 )
 
 // Analyse maze for path, wall, and node pixels
@@ -13,6 +14,13 @@ func Analyse(maze *Maze, print bool) *Maze {
 	// Reason being is that I want all pixels analysed (paths or wall etc.)
 	// There are ways it can be done so an improvement could be made at some point
 	analyseNodes(maze)
+
+	glog.Infof(" - Number of rows: %d\n", maze.Rows)
+	glog.Infof(" - Row length: %d\n", maze.RowLength)
+	glog.Infof(" - Start array position: (%d,%d)\n", maze.StartRow, maze.StartRowPos)
+	glog.Infof(" - End array position: (%d,%d)\n", maze.EndRow, maze.EndRowPos)
+	glog.Infof(" - Number of nodes: %d\n\n", maze.nodes) // Expecting 74
+
 	if print {
 		printMaze(maze)
 	}
@@ -22,12 +30,12 @@ func Analyse(maze *Maze, print bool) *Maze {
 func analysePath(maze *Maze) {
 	rows := len(maze.pixels)
 	for row := 0; row < rows; row++ {
-		// log.Printf("Length of row %d: %d\n", (row + 1), len(pixels[row]))
+		// glog.Printf("Length of row %d: %d\n", (row + 1), len(pixels[row]))
 		rowLength := len(maze.pixels[row])
 		maze.setRowLength(rowLength)
 		for rowPos := 0; rowPos < rowLength; rowPos++ {
 			pixel := maze.pixels[row][rowPos]
-			// log.Printf("RGBA of pixel %d,%d: %d,%d,%d,%d\n", row, col, pixel.rgba.R, pixel.rgba.G, pixel.rgba.B)
+			// glog.Printf("RGBA of pixel %d,%d: %d,%d,%d,%d\n", row, col, pixel.rgba.R, pixel.rgba.G, pixel.rgba.B)
 			if isBlack(pixel) {
 				maze.pixels[row][rowPos].setPath(false)
 			} else if isTransparent(pixel) {
@@ -40,7 +48,7 @@ func analysePath(maze *Maze) {
 					maze.setEnd(row, rowPos)
 				}
 			} else {
-				log.Printf("Error: Program only understands black and transparent pixels. RGBA of offending pixel: %d,%d,%d,%d", pixel.rgba.R, pixel.rgba.G, pixel.rgba.B, pixel.rgba.A)
+				glog.Errorf("Error: Program only understands black and transparent pixels. RGBA of offending pixel: %d,%d,%d,%d", pixel.rgba.R, pixel.rgba.G, pixel.rgba.B, pixel.rgba.A)
 				os.Exit(1)
 			}
 		}
@@ -53,7 +61,7 @@ func analyseNodes(maze *Maze) {
 		for rowPos := 0; rowPos < maze.RowLength; rowPos++ {
 			pixel, err := maze.GetPixel(row, rowPos)
 			if err != nil {
-				log.Fatal(err)
+				glog.Fatal(err)
 			} else if pixel.IsPath {
 				if pixel.IsStart || pixel.IsEnd {
 					pixel.IsNode = true
@@ -74,7 +82,7 @@ func analyseNodes(maze *Maze) {
 						pathCount++
 					}
 					if pathCount > 0 {
-						// log.Printf("Paths next to pixel (%d,%d): %d\n", x, y, pathCount)
+						// glog.Printf("Paths next to pixel (%d,%d): %d\n", x, y, pathCount)
 						switch pathCount {
 						case 1:
 							// Is dead end
@@ -103,27 +111,20 @@ func analyseNodes(maze *Maze) {
 }
 
 func printMaze(maze *Maze) {
-
-	log.Printf(" - Number of rows: %d\n", maze.Rows)
-	log.Printf(" - Row length: %d\n", maze.RowLength)
-	log.Printf(" - Start array position: (%d,%d)\n", maze.StartRow, maze.StartRowPos)
-	log.Printf(" - End array position: (%d,%d)\n", maze.EndRow, maze.EndRowPos)
-	log.Printf(" - Number of nodes: %d\n\n", maze.nodes) // Expecting 74
-
 	for row := 0; row < maze.Rows; row++ {
 		for rowPos := 0; rowPos < maze.RowLength; rowPos++ {
 			pixel, err := maze.GetPixel(row, rowPos)
 			if err != nil {
-				log.Fatal(err)
+				glog.Fatal(err)
 			} else {
 				if pixel.IsStart || pixel.IsEnd {
 					fmt.Print("~")
-				} else if pixel.IsPath {
-					fmt.Print(" ")
-				} else if pixel.IsDeadEnd {
-					fmt.Print("X")
 				} else if pixel.IsNode {
 					fmt.Print("O")
+				} else if pixel.IsDeadEnd {
+					fmt.Print("X")
+				} else if pixel.IsPath {
+					fmt.Print(" ")
 				} else {
 					fmt.Print("@")
 				}
