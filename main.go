@@ -9,7 +9,7 @@ import (
 	"github.com/golang/glog"
 )
 
-const debug bool = true
+const debug bool = false
 
 func usage() {
 	flag.PrintDefaults()

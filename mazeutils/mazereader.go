@@ -37,9 +37,9 @@ func analysePath(maze *Maze) {
 			pixel := maze.pixels[row][rowPos]
 			// glog.Printf("RGBA of pixel %d,%d: %d,%d,%d,%d\n", row, col, pixel.rgba.R, pixel.rgba.G, pixel.rgba.B)
 			if isBlack(pixel) {
-				maze.pixels[row][rowPos].setPath(false)
+				maze.pixels[row][rowPos].IsPath = false
 			} else if isTransparent(pixel) {
-				maze.pixels[row][rowPos].setPath(true)
+				maze.pixels[row][rowPos].IsPath = true
 				if row == 0 {
 					maze.pixels[row][rowPos].IsStart = true
 					maze.setStart(row, rowPos)
