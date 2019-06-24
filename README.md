@@ -11,6 +11,8 @@ This project comes with two mazes in the form of PNG images. These are generated
 - The maze entrance is at the top and the maze exit is at the bottom.
 - The wall and path widths are one pixel wide
 
+To improve efficiency, the application will read the image pixel-by-pixel to work out if the pixel is a wall or path. Then it will try and find the 'nodes'. These are the places in the maze that have more options than just backwards and forwards. This enables the application to go straight to the next node (the next place in the maze where it can do something different).
+
 Currently this application will only solve the maze using an 'always left' strategy (I'm learning Go, not maze solving strategies) but it can be extended easily.
 
 To run the application - ```go run main.go```
