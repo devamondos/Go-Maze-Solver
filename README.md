@@ -5,7 +5,7 @@
 
 I wanted to learn Go so thought that this would be a nice and simple starting point.
 
-This project comes with two mazes in the form of PNG images. These are generated using this website. However, this should work with any image providing that:
+This project comes with two mazes in the form of PNG images. These are generated using (this generator)[https://keesiemeijer.github.io/maze-generator/]. However, this should work with any image providing that:
 
 - The image is in black and transparent (PNG). Black being the walls.
 - The maze entrance is at the top and the maze exit is at the bottom.
