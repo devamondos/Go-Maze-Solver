@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fmt.Println("\nReading image...")
-	maze := mazeutils.Read("tiny.png")
+	maze := mazeutils.Read("medium.png")
 	fmt.Println("\nAnalysing maze...")
 	mazeutils.Analyse(maze, true)
 	fmt.Println("\nSolving maze...")
