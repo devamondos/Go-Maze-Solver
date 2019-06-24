@@ -22,12 +22,12 @@ func Analyse(maze *Maze, print bool) *Maze {
 func analysePath(maze *Maze) {
 	rows := len(maze.pixels)
 	for row := 0; row < rows; row++ {
-		// fmt.Printf("Length of row %d: %d\n", (row + 1), len(pixels[row]))
+		// log.Printf("Length of row %d: %d\n", (row + 1), len(pixels[row]))
 		rowLength := len(maze.pixels[row])
 		maze.setRowLength(rowLength)
 		for rowPos := 0; rowPos < rowLength; rowPos++ {
 			pixel := maze.pixels[row][rowPos]
-			// fmt.Printf("RGBA of pixel %d,%d: %d,%d,%d,%d\n", row, col, pixel.rgba.R, pixel.rgba.G, pixel.rgba.B)
+			// log.Printf("RGBA of pixel %d,%d: %d,%d,%d,%d\n", row, col, pixel.rgba.R, pixel.rgba.G, pixel.rgba.B)
 			if isBlack(pixel) {
 				maze.pixels[row][rowPos].setPath(false)
 			} else if isTransparent(pixel) {
@@ -40,7 +40,7 @@ func analysePath(maze *Maze) {
 					maze.setEnd(row, rowPos)
 				}
 			} else {
-				fmt.Printf("Error: Program only understands black and transparent pixels. RGBA of offending pixel: %d,%d,%d,%d", pixel.rgba.R, pixel.rgba.G, pixel.rgba.B, pixel.rgba.A)
+				log.Printf("Error: Program only understands black and transparent pixels. RGBA of offending pixel: %d,%d,%d,%d", pixel.rgba.R, pixel.rgba.G, pixel.rgba.B, pixel.rgba.A)
 				os.Exit(1)
 			}
 		}
@@ -74,7 +74,7 @@ func analyseNodes(maze *Maze) {
 						pathCount++
 					}
 					if pathCount > 0 {
-						// fmt.Printf("Paths next to pixel (%d,%d): %d\n", x, y, pathCount)
+						// log.Printf("Paths next to pixel (%d,%d): %d\n", x, y, pathCount)
 						switch pathCount {
 						case 1:
 							// Is dead end
@@ -104,11 +104,11 @@ func analyseNodes(maze *Maze) {
 
 func printMaze(maze *Maze) {
 
-	fmt.Printf("\n - Number of row: %d\n", maze.Rows)
-	fmt.Printf(" - row length: %d\n", maze.RowLength)
-	fmt.Printf(" - Start array position: (%d,%d)\n", maze.StartRow, maze.StartRowPos)
-	fmt.Printf(" - End array position: (%d,%d)\n", maze.EndRow, maze.EndRowPos)
-	fmt.Printf(" - Number of nodes: %d\n\n", maze.nodes) // Expecting 74
+	log.Printf(" - Number of rows: %d\n", maze.Rows)
+	log.Printf(" - Row length: %d\n", maze.RowLength)
+	log.Printf(" - Start array position: (%d,%d)\n", maze.StartRow, maze.StartRowPos)
+	log.Printf(" - End array position: (%d,%d)\n", maze.EndRow, maze.EndRowPos)
+	log.Printf(" - Number of nodes: %d\n\n", maze.nodes) // Expecting 74
 
 	for row := 0; row < maze.Rows; row++ {
 		for rowPos := 0; rowPos < maze.RowLength; rowPos++ {
