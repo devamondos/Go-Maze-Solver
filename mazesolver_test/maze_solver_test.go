@@ -14,8 +14,8 @@ var expectedMoves [9][2]int = [9][2]int{
 }
 
 func TestSolve(t *testing.T) {
-	maze := mb.Build(testfile, true)
-	solution := ms.Solve(maze, "alwaysLeft", true)
+	maze := mb.Build(testfile, false)
+	solution := ms.Solve(maze, "alwaysLeft", false)
 
 	if !solution.IsSuccessful {
 		t.Error("Solution was not found")

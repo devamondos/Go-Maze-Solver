@@ -97,6 +97,7 @@ func (m *Maze) GetSurroundingPaths(row int, rowPos int) (*Pixel, *Pixel, *Pixel,
 	return upperPath, rightPath, lowerPath, leftPath
 }
 
+// will return the pixel if it is a node
 func (m *Maze) isNextPixelNode(row int, rowPos int) (*Pixel, error) {
 	pixel, err := m.GetPixel(row, rowPos)
 	if err != nil {
@@ -115,13 +116,13 @@ func (m *Maze) isNextPixelNode(row int, rowPos int) (*Pixel, error) {
 func (m *Maze) GetNextNodeUp(row int, rowPos int) (*Pixel, [][2]int, error) {
 	moves := [][2]int{}
 	for rowIndex := (row - 1); rowIndex > 0; rowIndex-- { // ignoring top wall
-		pixel, err := m.isNextPixelNode(rowIndex, rowPos)
+		node, err := m.isNextPixelNode(rowIndex, rowPos)
 		if err != nil {
 			return nil, nil, err
 		}
 		moves = append(moves, [2]int{rowIndex, rowPos})
-		if pixel != nil {
-			return pixel, moves, nil
+		if node != nil {
+			return node, moves, nil
 		}
 	}
 	return nil, nil, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
@@ -131,13 +132,13 @@ func (m *Maze) GetNextNodeUp(row int, rowPos int) (*Pixel, [][2]int, error) {
 func (m *Maze) GetNextNodeRight(row int, rowPos int) (*Pixel, [][2]int, error) {
 	moves := [][2]int{}
 	for rowPosIndex := (rowPos + 1); rowPosIndex < (m.RowLength - 1); rowPosIndex++ { // ignoring right wall
-		pixel, err := m.isNextPixelNode(row, rowPosIndex)
+		node, err := m.isNextPixelNode(row, rowPosIndex)
 		if err != nil {
 			return nil, nil, err
 		}
 		moves = append(moves, [2]int{row, rowPosIndex})
-		if pixel != nil {
-			return pixel, moves, nil
+		if node != nil {
+			return node, moves, nil
 		}
 	}
 	return nil, moves, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
@@ -147,13 +148,13 @@ func (m *Maze) GetNextNodeRight(row int, rowPos int) (*Pixel, [][2]int, error) {
 func (m *Maze) GetNextNodeDown(row int, rowPos int) (*Pixel, [][2]int, error) {
 	moves := [][2]int{}
 	for rowIndex := (row + 1); rowIndex < m.Rows; rowIndex++ { // not ignoring bottom wall, that's where the exit is
-		pixel, err := m.isNextPixelNode(rowIndex, rowPos)
+		node, err := m.isNextPixelNode(rowIndex, rowPos)
 		if err != nil {
 			return nil, nil, err
 		}
 		moves = append(moves, [2]int{rowIndex, rowPos})
-		if pixel != nil {
-			return pixel, moves, nil
+		if node != nil {
+			return node, moves, nil
 		}
 	}
 	return nil, moves, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)
@@ -163,13 +164,13 @@ func (m *Maze) GetNextNodeDown(row int, rowPos int) (*Pixel, [][2]int, error) {
 func (m *Maze) GetNextNodeLeft(row int, rowPos int) (*Pixel, [][2]int, error) {
 	moves := [][2]int{}
 	for rowPosIndex := (rowPos - 1); rowPosIndex > 0; rowPosIndex-- { // ignoring left wall
-		pixel, err := m.isNextPixelNode(row, rowPosIndex)
+		node, err := m.isNextPixelNode(row, rowPosIndex)
 		if err != nil {
 			return nil, nil, err
 		}
 		moves = append(moves, [2]int{row, rowPosIndex})
-		if pixel != nil {
-			return pixel, moves, nil
+		if node != nil {
+			return node, moves, nil
 		}
 	}
 	return nil, moves, fmt.Errorf("Error: Could not find next node (%d,%d)", row, rowPos)

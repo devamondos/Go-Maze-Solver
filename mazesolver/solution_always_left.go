@@ -28,57 +28,54 @@ func makeMove(maze *mb.Maze, meta *MazeMeta) {
 	if meta.debug {
 		time.Sleep(1 * time.Second)
 	}
-	nextPixel := checkNextPixel(maze, meta)
-	var pixel *mb.Pixel
-	var moves [][2]int
-	var err error
-	if nextPixel == nil {
-		glog.Fatal("Error: could not find next pixel")
-		os.Exit(1)
-	}
-	if nextPixel.IsEnd {
-		glog.V(2).Infof("EXIT FOUND!! (%d, %d)", nextPixel.Row, nextPixel.RowPos)
-		meta.addMove(nextPixel.Row, nextPixel.RowPos)
-		meta.IsSuccessful = true
-		return
-	} else if !nextPixel.IsPath || nextPixel.IsDeadEnd {
-		glog.V(2).Info("Next pixel is wall or dead end")
-		if nextPixel.IsDeadEnd {
-			meta.addMove(nextPixel.Row, nextPixel.RowPos)
-		}
-		changeDirection(maze, meta, nextPixel)
-	} else if nextPixel.IsNode {
-		glog.V(2).Info("Next pixel is node")
-		setMazeLocation(meta, nextPixel)
-		meta.addMove(meta.row, meta.rowPos)
-		changeDirection(maze, meta, nextPixel)
+	// lets first check if the next pixel is a wall
+	nextPixelIsPath := isNextPixelPath(maze, meta)
+	if !nextPixelIsPath {
+		// we need to turn around
+		glog.V(2).Info("Next pixel is wall")
+		changeDirection(maze, meta, true)
 	} else {
+		// next pixel is not a wall let's carry on
+		var node *mb.Pixel
+		var moves [][2]int
+		var err error
 		switch meta.directions[meta.direction] {
 		case "up":
-			pixel, moves, err = maze.GetNextNodeUp(meta.row, meta.rowPos)
+			node, moves, err = maze.GetNextNodeUp(meta.row, meta.rowPos)
 			break
 		case "right":
-			pixel, moves, err = maze.GetNextNodeRight(meta.row, meta.rowPos)
+			node, moves, err = maze.GetNextNodeRight(meta.row, meta.rowPos)
 			break
 		case "down":
-			pixel, moves, err = maze.GetNextNodeDown(meta.row, meta.rowPos)
+			node, moves, err = maze.GetNextNodeDown(meta.row, meta.rowPos)
 			break
 		case "left":
-			pixel, moves, err = maze.GetNextNodeLeft(meta.row, meta.rowPos)
+			node, moves, err = maze.GetNextNodeLeft(meta.row, meta.rowPos)
 			break
 		}
 		if err != nil {
+			// there was an error getting the next node, we need to stop execution
 			glog.Fatal(err)
 			os.Exit(1)
-		} else if pixel != nil {
+		} else if node != nil {
+			// we have found the next node
 			meta.addMoves(moves)
-			if pixel.IsDeadEnd {
-				glog.V(2).Infof("Encountered dead end (%d,%d)\n", pixel.Row, pixel.RowPos)
-				changeDirection(maze, meta, pixel)
-			} else if pixel.IsNode {
-				glog.V(2).Infof("Node array pos (%d,%d)\n", pixel.Row, pixel.RowPos)
-				setMazeLocation(meta, pixel)
-				changeDirection(maze, meta, nextPixel)
+			if node.IsEnd {
+				// We have found the exit
+				glog.V(2).Infof("EXIT FOUND!! (%d, %d)", node.Row, node.RowPos)
+				meta.IsSuccessful = true
+				return
+			} else if node.IsDeadEnd {
+				// it is a dead end so we don't want to set the location
+				// this means it will resume execution from the last node
+				glog.V(2).Infof("Encountered dead end (%d,%d)\n", node.Row, node.RowPos)
+				changeDirection(maze, meta, true)
+			} else {
+				// this is a node that is not a dead end
+				// we should set the location to here
+				glog.V(2).Infof("Node array pos (%d,%d)\n", node.Row, node.RowPos)
+				setMazeLocation(meta, node)
+				changeDirection(maze, meta, false)
 			}
 		}
 	}
@@ -89,7 +86,7 @@ func setMazeLocation(meta *MazeMeta, pixel *mb.Pixel) {
 	meta.rowPos = pixel.RowPos
 }
 
-func checkNextPixel(maze *mb.Maze, meta *MazeMeta) *mb.Pixel {
+func isNextPixelPath(maze *mb.Maze, meta *MazeMeta) bool {
 	var nextRow, nextRowPos int
 	switch meta.directions[meta.direction] {
 	case "up":
@@ -110,18 +107,17 @@ func checkNextPixel(maze *mb.Maze, meta *MazeMeta) *mb.Pixel {
 		break
 	}
 	nextPixel, _ := maze.GetPixel(nextRow, nextRowPos)
-	return nextPixel
+	return nextPixel.IsPath
 }
 
-func changeDirection(maze *mb.Maze, meta *MazeMeta, pixel *mb.Pixel) {
-	getNextDirection(meta, pixel)
+func changeDirection(maze *mb.Maze, meta *MazeMeta, isWall bool) {
+	getNextDirection(meta, isWall)
 	makeMove(maze, meta)
 }
 
-func getNextDirection(meta *MazeMeta, pixel *mb.Pixel) {
-	if !pixel.IsPath {
-		meta.direction++
-	} else if pixel.IsDeadEnd {
+// will turn left unless we have encountered a wall
+func getNextDirection(meta *MazeMeta, isWall bool) {
+	if isWall {
 		meta.direction++
 	} else {
 		meta.direction--
