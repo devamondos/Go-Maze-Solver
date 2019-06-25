@@ -17,4 +17,4 @@ Currently this application will only solve the maze using an 'always left' strat
 
 To run the application - ```go run main.go```
 
-To test the application - (Unfinished)
+To test the application - ```go test ./...```
