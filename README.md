@@ -9,7 +9,7 @@ This project comes with two mazes in the form of PNG images. These are generated
 
 - The image is in black and transparent (PNG). Black being the walls.
 - The maze entrance is at the top and the maze exit is at the bottom.
-- The wall and path widths are one pixel wide
+- The wall and path widths are one pixel wide (could easily be extended to handle whatever size)
 
 To improve efficiency, the application will read the image pixel-by-pixel to work out if the pixel is a wall or path. Then it will try and find the 'nodes'. These are the places in the maze that have more options than just backwards and forwards. This enables the application to go straight to the next node (the next place in the maze where it can do something different).
 
