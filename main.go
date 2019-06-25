@@ -4,12 +4,15 @@ import (
 	"flag"
 	"os"
 
-	"github.com/devamondos/maze_solver/mazesolvers"
-	"github.com/devamondos/maze_solver/mazeutils"
-	"github.com/golang/glog"
+	mb "github.com/devamondos/maze_solver/mazebuilder"
+	ms "github.com/devamondos/maze_solver/mazesolver"
 )
 
 const debug bool = false
+const solution string = "alwaysLeft"
+
+// const image string = "tiny.png"
+const image string = "medium.png"
 
 func usage() {
 	flag.PrintDefaults()
@@ -31,10 +34,6 @@ func init() {
 }
 
 func main() {
-	glog.Info("Reading image...")
-	maze := mazeutils.Read("medium.png")
-	glog.Info("Analysing maze...")
-	mazeutils.Analyse(maze, debug)
-	glog.Info("Solving maze...")
-	mazesolvers.Solve(maze, "alwaysLeft", debug)
+	maze := mb.Build(image, debug)
+	ms.Solve(maze, solution, debug)
 }

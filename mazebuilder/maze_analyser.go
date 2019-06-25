@@ -8,7 +8,8 @@ import (
 )
 
 // Analyse maze for path, wall, and node pixels
-func Analyse(maze *Maze, print bool) *Maze {
+func analyse(maze *Maze, print bool) *Maze {
+	glog.Info("Analysing maze...")
 	analysePath(maze)
 	// I want to do another loop over the maze rather than do it in the above loop
 	// Reason being is that I want all pixels analysed (paths or wall etc.)

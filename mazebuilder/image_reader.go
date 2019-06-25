@@ -9,11 +9,12 @@ import (
 	"github.com/golang/glog"
 )
 
-// Read image and return pixel array
-func Read(filePath string) *Maze {
+// Read maze from image and return pixel array
+func read(filePath string, debug bool) *Maze {
 	// You can register another format here
 	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 
+	glog.Info("Reading image...")
 	file, err := os.Open(filePath)
 
 	if err != nil {
